@@ -9,4 +9,4 @@ Fernando R. (fr2510) Team 202212-25 Daily Financial Risk Aid final project for C
 - The remaining DAG files should be run on a Google Cloud Ubuntu VM with all of the header dependencies installed and the proper folder naming conventions added to the code.
   - This is due to the code being set with Fernando's VM directory structure. 
 - Please note that all of Fernando's secret tokens were removed from the code for security reasons as these are specific to his Twitter and Google Cloud accounts.
-  - Please add you own personal tokens for code execution.
+  - Please add your own personal tokens for code execution.
