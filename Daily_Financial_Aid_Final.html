@@ -1,0 +1,2234 @@
+<!-- Daily_Financial_Aid_Final.html -->
+
+<!-- Fernando Rodriguez-Guzman Jr -->
+<!-- fr2510 | fr2510@columbia.edu -->
+<!-- December 23rd, 2022 -->
+<!-- EECS E6893: Big Data Analytics -->
+<!-- Final Project: Daily Financial Investment Risk Aid -->
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+
+<!-- Load d3-cloud -->
+<script src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3.layout.cloud.js"></script>
+
+<!-- Color Scale -->
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
+<script>
+
+//Start of Word Cloud
+d3.csv("https://raw.githubusercontent.com/FernandoEE/EECS6893_Daily_Financial_Aid/main/Financial_Data/tweets/combined/combined_hashtags.csv",
+  function(data) {
+
+  var myWords = [];
+  var temp_dict = {};
+
+	for (let i = 0; i < data.length; i++) {
+		temp_dict.word = data[i]["hashtags"];
+		temp_dict.size = data[i]["count"];	// Convert from string to int
+
+		myWords.push(temp_dict);	// push dictionary to list
+		temp_dict = {};
+
+	}
+
+	// Head Style Settings
+	document.write("<html>");
+	document.write("<head>");
+	document.write("<style>");
+
+	document.write("h1{text-align: left;\
+					font-family: Arial Rounded MT Bold, Helvetica, sans-serif;\
+					font-size: 30px;\
+				  text-shadow: 4px 4px 6px white;\
+  				color: Black;}");
+	
+	document.write("h2{text-align: left;\
+					font-family: Arial Rounded MT, Helvetica, sans-serif;\
+					font-size: 15px;\
+				  text-shadow: 4px 4px 6px white;\
+  				color: Black;}");
+	
+	document.write("h3{text-indent: 675px;\
+					font-family: Arial Rounded MT Bold, Helvetica, sans-serif;\
+					font-size: 40px;\
+				  text-shadow: 4px 4px 6px white;\
+  				color: Black;}");
+
+	document.write("body{background-image: url(\"https:\/\/wallpapercave.com\/wp\/wp2468657.jpg\");\
+					background-position: center;\
+          background-repeat: no-repeat;\
+          background-attachment: fixed;}");
+
+	document.write("div{background: rgba(0, 0, 0, 0.8);}");
+
+	// Style for Plot Graphs
+	document.write("axis line{stroke: white;}");
+	document.write(".axis path{stroke: white;}");
+	document.write(".axis text{fill: white;}");
+
+	document.write("</style>");
+	document.write("</head>");
+
+	// Body of Webpage
+	document.write("<body>");
+
+	document.write("<title>Daily Financial Aid</title>");
+	document.write("<h1>Daily Financial Aid</h1>");
+	document.write("<h2>Fernando Rodriguez-Guzman Jr</h2>");
+	document.write("<h2>fr2510 | fr2510@columbia.edu</h2>");
+	document.write("<h2>EECS E6893: Big Data Analytics</h2>");
+	document.write("<h2>Fall 2022</h2>");
+
+	document.write("<h3>Trending Words</h3>");
+
+	// Word Cloud
+	document.write("<div id=\"Trending_Words\"><\/div>");
+
+  // set the dimensions and margins of the graph
+	var margin = {top: 10, right: 10, bottom: 10, left: 10},
+	    width = (800*2) - margin.left - margin.right,
+	    height = (400*2) - margin.top - margin.bottom;
+
+	// append the svg object to the body of the page
+	var svg = d3.select("#Trending_Words").append("svg")
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom)
+	  	.append("g")
+	    .attr("transform",
+	          "translate(" + margin.left + "," + margin.top + ")");
+
+	// Constructs a new cloud layout instance
+	var layout = d3.layout.cloud()
+	  .size([width, height])
+	  .words(myWords.map(function(d) { return {text: d.word, size:d.size}; }))
+	  .padding(9)        //space between words
+	  .rotate(function() { return ~~(Math.random() * 2) * 90; })
+	  .fontSize(function(d) { return d.size*13; })      // font size of words
+	  .on("end", draw);
+	layout.start();
+
+	// Draw the words
+	function draw(words) {
+	  svg
+	    .append("g")
+	      .attr("transform", "translate(" + layout.size()[0] / 2 + "," + layout.size()[1] / 2 + ")")
+	      .selectAll("text")
+	        .data(words)
+	      .enter().append("text")
+	        .style("font-size", function(d) { return d.size; })
+	        .style("fill", "#4AB2EE")
+	        .attr("text-anchor", "middle")
+	        .style("font-family", "Impact")
+	        .attr("transform", function(d) {
+	          return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+	        })
+	        .text(function(d) { return d.text; });
+		}
+
+})
+
+// Start of AGTHX_Stock_History
+d3.csv("https://raw.githubusercontent.com/FernandoEE/EECS6893_Daily_Financial_Aid/main/Financial_Data/agthx_stock_history.csv",
+  // When reading the csv, I must format variables:
+  function(d){
+    return { date : d3.timeParse("%Y-%m-%d")(d.Date.slice(0,10)), value : d.Close } //Use only chars [0:10] for the date
+  },
+  // Now I can use this dataset:
+  function(data) {
+
+  	document.write("<h3>AGTHX Stock History</h3>");
+
+    //Create a div where the graph will take place
+    document.write("<div id=\"AGTHX_Stock_History\"></div>");
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 30, bottom: 50, left: 60},
+      width = (800*2) - margin.left - margin.right,
+      height = (400*2) - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#AGTHX_Stock_History")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + (margin.left + 45) + "," + margin.top + ")");
+    
+    // Add X axis --> it is a date format
+    var x = d3.scaleTime()
+      .domain(d3.extent(data, function(d) { return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisBottom(x));
+    // Add Y axis
+    var y = d3.scaleLinear()
+      .domain( [0, d3.max(data, function(d) { return parseFloat(d.value)})])	// Give Max Value 
+      .range([ height, 0 ]);
+    svg.append("g")
+    	.attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisLeft(y));
+    // Add the line
+    svg.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "#2BDF20")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.line()
+        .x(function(d) { return x(d.date) })
+        .y(function(d) { return y(d.value) })
+        )
+    // Add the points
+    svg
+      .append("g")
+      .selectAll("dot")
+      .data(data)
+      .enter()
+      .append("circle")
+        .attr("cx", function(d) { return x(d.date) } )
+        .attr("cy", function(d) { return y(d.value) } )
+        .attr("r", 0.3)
+        .attr("fill", "#2BDF20")
+
+    // Add Bottom Label
+    svg.append("text")
+      .attr("x", 775)
+      .attr("y", 790)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .text("Date");
+
+    // Add Left Label
+    svg.append("text")
+      .attr("x", -425)
+      .attr("y", -50)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .attr("transform", "rotate(-90)")
+      .text("Price (USD)");
+
+})
+
+// Start of AGTHX_Stock_MAE
+d3.csv("https://raw.githubusercontent.com/FernandoEE/EECS6893_Daily_Financial_Aid/main/Financial_Data/stock_mae_history.csv", function(d){
+    	return { date : d3.timeParse("%Y-%m-%d")(d.Date.slice(0,10)), Stock: d.Stock, Close: d.Close, Predicted_Close: d.Predicted_Close}
+  },
+  // Now I can use this dataset:
+  function(data) {
+
+  	document.write("<h3>AGTHX Stock Prediction</h3>");
+
+    //Create a div where the graph will take place
+    document.write("<div id=\"AGTHX_Stock_Prediction\"></div>");
+
+    // Parse the specific stock to display
+    parse_data = []
+    temp_dict = {}
+    for (let i = 0; i < data.length; i++) {
+      if (data[i]["Stock"] == "agthx") {
+        temp_dict["date"] = data[i]["date"]
+        temp_dict["Stock"] = data[i]["Stock"]
+        temp_dict["Close"] = data[i]["Close"]
+        temp_dict["Predicted_Close"] = data[i]["Predicted_Close"]
+
+        parse_data.push(temp_dict)
+
+        // Clear Temp
+        temp_dict = {}
+
+      }
+    }
+
+  // set the dimensions and margins of the graph
+	var margin = {top: 10, right: 100, bottom: 50, left: 30},
+	    width = (800*2) - margin.left - margin.right,
+	    height = (400*2) - margin.top - margin.bottom;
+
+	// append the svg object to the body of the page
+	var svg = d3.select("#AGTHX_Stock_Prediction")
+	  .append("svg")
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom)
+	  .append("g")
+	    .attr("transform",
+	          "translate(" + (margin.left + 45) + "," + margin.top + ")");
+
+    // List of groups (here I have one group per column)
+    var allGroup = ["Close", "Predicted_Close"]
+
+    // Reformat the data: we need an array of arrays of {x, y} tuples
+    var dataReady = allGroup.map( function(grpName) {
+      return {
+        name: grpName,
+        values: parse_data.map(function(d) {
+          return {time: d.date, value: +d[grpName]};
+        })
+      };
+    });
+
+    // Color scale of one color for each group
+    var myColor = d3.scaleOrdinal()
+      .domain(allGroup)
+      .range(d3.schemeSet2);
+
+    // Add X axis --> it is a date format
+    var x = d3.scaleTime() 
+      .domain(d3.extent(data, function(d) { return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisBottom(x));
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+      .domain( [d3.min(parse_data, function(d) { return parseFloat(d.Predicted_Close)}), d3.max(parse_data, function(d) { return parseFloat(d.Close)})])  
+      .range([ height, 0 ]);
+    svg.append("g")
+      .attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisLeft(y));
+
+    // Add the lines
+    var line = d3.line()
+      .x(function(d) { return x(+d.time) })
+      .y(function(d) { return y(+d.value) })
+    svg.selectAll("myLines")
+      .data(dataReady)
+      .enter()
+      .append("path")
+        .attr("class", function(d){ return d.name })
+        .attr("d", function(d){ return line(d.values) } )
+        .attr("stroke", function(d){ return myColor(d.name) })
+        .style("stroke-width", 2)
+        .style("fill", "none")
+
+    // Add Bottom Label
+    svg.append("text")
+      .attr("x", 775)
+      .attr("y", 790)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .text("Date");
+
+    // Add Left Label
+    svg.append("text")
+      .attr("x", -425)
+      .attr("y", -50)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .attr("transform", "rotate(-90)")
+      .text("Price (USD)");
+
+    // Add the points
+    svg
+      .selectAll("myDots")
+      .data(dataReady)
+      .enter()
+        .append('g')
+        .style("fill", function(d){ return myColor(d.name) })
+        .attr("class", function(d){ return d.name })
+      .selectAll("myPoints")
+      .data(function(d){ return d.values })
+      .enter()
+      .append("circle")
+        .attr("cx", function(d) { return x(d.time) } )
+        .attr("cy", function(d) { return y(d.value) } )
+        .attr("r", 5)
+     
+    svg
+      .selectAll("myLegend")
+      .data(dataReady)
+      .enter()
+        .append('g')
+        .append("text")
+          .attr('x', function(d,i){ return 30 + i*80})
+          .attr('y', 30)
+          .text(function(d) { return d.name; })
+          .style("fill", function(d){ return myColor(d.name) })
+          .style("font-size", 30)
+        .on("click", function(d){
+          currentOpacity = d3.selectAll("." + d.name).style("opacity")
+          // Change the opacity: from 0 to 1 or from 1 to 0
+          d3.selectAll("." + d.name).transition().style("opacity", currentOpacity == 1 ? 0:1)
+
+        })
+})
+
+// Start of ENPH_Stock_History
+d3.csv("https://raw.githubusercontent.com/FernandoEE/EECS6893_Daily_Financial_Aid/main/Financial_Data/enph_stock_history.csv",
+  // When reading the csv, I must format variables:
+  function(d){
+    return { date : d3.timeParse("%Y-%m-%d")(d.Date.slice(0,10)), value : d.Close } //Use only chars [0:10] for the date
+  },
+  // Now I can use this dataset:
+  function(data) {
+
+  	document.write("<h3>ENPH Stock History</h3>");
+
+    //Create a div where the graph will take place
+    document.write("<div id=\"ENPH_Stock_History\"></div>");
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 30, bottom: 50, left: 60},
+      width = (800*2) - margin.left - margin.right,
+      height = (400*2) - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#ENPH_Stock_History")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + (margin.left + 45) + "," + margin.top + ")");
+    
+    // Add X axis --> it is a date format
+    var x = d3.scaleTime()
+      .domain(d3.extent(data, function(d) { return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+    	.attr("class", "axis")	//
+      .style("font", "20px times")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+    // Add Y axis
+    var y = d3.scaleLinear()
+      .domain( [0, d3.max(data, function(d) { return parseFloat(d.value)})])	// Give Max Value 
+      .range([ height, 0 ]);
+    svg.append("g")
+    	.attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisLeft(y));
+    // Add the line
+    svg.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "#2BDF20")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.line()
+        .x(function(d) { return x(d.date) })
+        .y(function(d) { return y(d.value) })
+        )
+    // Add the points
+    svg
+      .append("g")
+      .selectAll("dot")
+      .data(data)
+      .enter()
+      .append("circle")
+        .attr("cx", function(d) { return x(d.date) } )
+        .attr("cy", function(d) { return y(d.value) } )
+        .attr("r", 0.3)
+        .attr("fill", "#2BDF20")
+
+    // Add Bottom Label
+    svg.append("text")
+      .attr("x", 775)
+      .attr("y", 790)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .text("Date");
+
+    // Add Left Label
+    svg.append("text")
+      .attr("x", -425)
+      .attr("y", -50)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .attr("transform", "rotate(-90)")
+      .text("Price (USD)");
+
+})
+
+// Start of ENPH_Stock_MAE
+d3.csv("https://raw.githubusercontent.com/FernandoEE/EECS6893_Daily_Financial_Aid/main/Financial_Data/stock_mae_history.csv", function(d){
+    	return { date : d3.timeParse("%Y-%m-%d")(d.Date.slice(0,10)), Stock: d.Stock, Close: d.Close, Predicted_Close: d.Predicted_Close}
+  },
+  // Now I can use this dataset:
+  function(data) {
+
+  	document.write("<h3>ENPH Stock Prediction</h3>");
+
+    //Create a div where the graph will take place
+    document.write("<div id=\"ENPH_Stock_Prediction\"></div>");
+
+    // Parse the specific stock to display
+    parse_data = []
+    temp_dict = {}
+    for (let i = 0; i < data.length; i++) {
+      if (data[i]["Stock"] == "enph") {
+        temp_dict["date"] = data[i]["date"]
+        temp_dict["Stock"] = data[i]["Stock"]
+        temp_dict["Close"] = data[i]["Close"]
+        temp_dict["Predicted_Close"] = data[i]["Predicted_Close"]
+
+        parse_data.push(temp_dict)
+
+        // Clear Temp
+        temp_dict = {}
+
+      }
+    }
+
+  // set the dimensions and margins of the graph
+	var margin = {top: 10, right: 100, bottom: 50, left: 30},
+	    width = (800*2) - margin.left - margin.right,
+	    height = (400*2) - margin.top - margin.bottom;
+
+	// append the svg object to the body of the page
+	var svg = d3.select("#ENPH_Stock_Prediction")
+	  .append("svg")
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom)
+	  .append("g")
+	    .attr("transform",
+	          "translate(" + (margin.left + 45) + "," + margin.top + ")");
+
+    // List of groups (here I have one group per column)
+    var allGroup = ["Close", "Predicted_Close"]
+
+    // Reformat the data: we need an array of arrays of {x, y} tuples
+    var dataReady = allGroup.map( function(grpName) {
+      return {
+        name: grpName,
+        values: parse_data.map(function(d) {
+          return {time: d.date, value: +d[grpName]};
+        })
+      };
+    });
+
+    // A color scale: one color for each group
+    var myColor = d3.scaleOrdinal()
+      .domain(allGroup)
+      .range(d3.schemeSet2);
+
+    // Add X axis --> it is a date format
+    var x = d3.scaleTime() 
+      .domain(d3.extent(data, function(d) { return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisBottom(x));
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+    	.domain( [d3.min(parse_data, function(d) { return parseFloat(d.Predicted_Close)}), d3.max(parse_data, function(d) { return parseFloat(d.Close)})])  
+      .range([ height, 0 ]);
+    svg.append("g")
+      .attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisLeft(y));
+
+    // Add the lines
+    var line = d3.line()
+      .x(function(d) { return x(+d.time) })
+      .y(function(d) { return y(+d.value) })
+    svg.selectAll("myLines")
+      .data(dataReady)
+      .enter()
+      .append("path")
+        .attr("class", function(d){ return d.name })
+        .attr("d", function(d){ return line(d.values) } )
+        .attr("stroke", function(d){ return myColor(d.name) })
+        .style("stroke-width", 2)
+        .style("fill", "none")
+
+    // Add Bottom Label
+    svg.append("text")
+      .attr("x", 775)
+      .attr("y", 790)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .text("Date");
+
+    // Add Left Label
+    svg.append("text")
+      .attr("x", -425)
+      .attr("y", -50)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .attr("transform", "rotate(-90)")
+      .text("Price (USD)");
+
+    // Add the points
+    svg
+      .selectAll("myDots")
+      .data(dataReady)
+      .enter()
+        .append('g')
+        .style("fill", function(d){ return myColor(d.name) })
+        .attr("class", function(d){ return d.name })
+      .selectAll("myPoints")
+      .data(function(d){ return d.values })
+      .enter()
+      .append("circle")
+        .attr("cx", function(d) { return x(d.time) } )
+        .attr("cy", function(d) { return y(d.value) } )
+        .attr("r", 5)
+     
+    svg
+      .selectAll("myLegend")
+      .data(dataReady)
+      .enter()
+        .append('g')
+        .append("text")
+          .attr('x', function(d,i){ return 30 + i*80})
+          .attr('y', 30)
+          .text(function(d) { return d.name; })
+          .style("fill", function(d){ return myColor(d.name) })
+          .style("font-size", 30)
+        .on("click", function(d){
+          currentOpacity = d3.selectAll("." + d.name).style("opacity")
+          // Change the opacity: from 0 to 1 or from 1 to 0
+          d3.selectAll("." + d.name).transition().style("opacity", currentOpacity == 1 ? 0:1)
+
+        })
+})
+
+// Start of FOUR_Stock_History
+d3.csv("https://raw.githubusercontent.com/FernandoEE/EECS6893_Daily_Financial_Aid/main/Financial_Data/four_stock_history.csv",
+  // When reading the csv, I must format variables:
+  function(d){
+    return { date : d3.timeParse("%Y-%m-%d")(d.Date.slice(0,10)), value : d.Close } //Use only chars [0:10] for the date
+  },
+  // Now I can use this dataset:
+  function(data) {
+
+  	document.write("<h3>FOUR Stock History</h3>");
+
+    //Create a div where the graph will take place
+    document.write("<div id=\"FOUR_Stock_History\"></div>");
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 30, bottom: 50, left: 60},
+      width = (800*2) - margin.left - margin.right,
+      height = (400*2) - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#FOUR_Stock_History")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + (margin.left + 45) + "," + margin.top + ")");
+    
+    // Add X axis --> it is a date format
+    var x = d3.scaleTime()
+      .domain(d3.extent(data, function(d) { return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+    	.attr("class", "axis")	//
+      .style("font", "20px times")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+    // Add Y axis
+    var y = d3.scaleLinear()
+      .domain( [0, d3.max(data, function(d) { return parseFloat(d.value)})])	// Give Max Value 
+      .range([ height, 0 ]);
+    svg.append("g")
+    	.attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisLeft(y));
+    // Add the line
+    svg.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "#2BDF20")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.line()
+        .x(function(d) { return x(d.date) })
+        .y(function(d) { return y(d.value) })
+        )
+    // Add the points
+    svg
+      .append("g")
+      .selectAll("dot")
+      .data(data)
+      .enter()
+      .append("circle")
+        .attr("cx", function(d) { return x(d.date) } )
+        .attr("cy", function(d) { return y(d.value) } )
+        .attr("r", 0.3)
+        .attr("fill", "#2BDF20")
+
+    // Add Bottom Label
+    svg.append("text")
+      .attr("x", 775)
+      .attr("y", 790)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .text("Date");
+
+    // Add Left Label
+    svg.append("text")
+      .attr("x", -425)
+      .attr("y", -50)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .attr("transform", "rotate(-90)")
+      .text("Price (USD)");
+
+})
+
+// Start of FOUR_Stock_MAE
+d3.csv("https://raw.githubusercontent.com/FernandoEE/EECS6893_Daily_Financial_Aid/main/Financial_Data/stock_mae_history.csv", function(d){
+    	return { date : d3.timeParse("%Y-%m-%d")(d.Date.slice(0,10)), Stock: d.Stock, Close: d.Close, Predicted_Close: d.Predicted_Close}
+  },
+  // Now I can use this dataset:
+  function(data) {
+
+  	document.write("<h3>FOUR Stock Prediction</h3>");
+
+    //Create a div where the graph will take place
+    document.write("<div id=\"FOUR_Stock_Prediction\"></div>");
+
+    // Parse the specific stock to display
+    parse_data = []
+    temp_dict = {}
+    for (let i = 0; i < data.length; i++) {
+      if (data[i]["Stock"] == "four") {
+        temp_dict["date"] = data[i]["date"]
+        temp_dict["Stock"] = data[i]["Stock"]
+        temp_dict["Close"] = data[i]["Close"]
+        temp_dict["Predicted_Close"] = data[i]["Predicted_Close"]
+
+        parse_data.push(temp_dict)
+
+        // Clear Temp
+        temp_dict = {}
+
+      }
+    }
+
+    // set the dimensions and margins of the graph
+	var margin = {top: 10, right: 100, bottom: 50, left: 30},
+	    width = (800*2) - margin.left - margin.right,
+	    height = (400*2) - margin.top - margin.bottom;
+
+	// append the svg object to the body of the page
+	var svg = d3.select("#FOUR_Stock_Prediction")
+	  .append("svg")
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom)
+	  .append("g")
+	    .attr("transform",
+	          "translate(" + (margin.left + 45) + "," + margin.top + ")");
+
+    // List of groups (here I have one group per column)
+    var allGroup = ["Close", "Predicted_Close"]
+
+    // Reformat the data: we need an array of arrays of {x, y} tuples
+    var dataReady = allGroup.map( function(grpName) {
+      return {
+        name: grpName,
+        values: parse_data.map(function(d) {
+          return {time: d.date, value: +d[grpName]};
+        })
+      };
+    });
+
+    // A color scale: one color for each group
+    var myColor = d3.scaleOrdinal()
+      .domain(allGroup)
+      .range(d3.schemeSet2);
+
+    // Add X axis --> it is a date format
+    var x = d3.scaleTime() 
+      .domain(d3.extent(data, function(d) { return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisBottom(x));
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+    	.domain( [d3.min(parse_data, function(d) { return parseFloat(d.Close)}), d3.max(parse_data, function(d) { return parseFloat(d.Predicted_Close)})])  
+      .range([ height, 0 ]);
+    svg.append("g")
+      .attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisLeft(y));
+
+    // Add the lines
+    var line = d3.line()
+      .x(function(d) { return x(+d.time) })
+      .y(function(d) { return y(+d.value) })
+    svg.selectAll("myLines")
+      .data(dataReady)
+      .enter()
+      .append("path")
+        .attr("class", function(d){ return d.name })
+        .attr("d", function(d){ return line(d.values) } )
+        .attr("stroke", function(d){ return myColor(d.name) })
+        .style("stroke-width", 2)
+        .style("fill", "none")
+
+    // Add Bottom Label
+    svg.append("text")
+      .attr("x", 775)
+      .attr("y", 790)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .text("Date");
+
+    // Add Left Label
+    svg.append("text")
+      .attr("x", -425)
+      .attr("y", -50)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .attr("transform", "rotate(-90)")
+      .text("Price (USD)");
+
+    // Add the points
+    svg
+      .selectAll("myDots")
+      .data(dataReady)
+      .enter()
+        .append('g')
+        .style("fill", function(d){ return myColor(d.name) })
+        .attr("class", function(d){ return d.name })
+      .selectAll("myPoints")
+      .data(function(d){ return d.values })
+      .enter()
+      .append("circle")
+        .attr("cx", function(d) { return x(d.time) } )
+        .attr("cy", function(d) { return y(d.value) } )
+        .attr("r", 5)
+     
+    svg
+      .selectAll("myLegend")
+      .data(dataReady)
+      .enter()
+        .append('g')
+        .append("text")
+          .attr('x', function(d,i){ return 30 + i*80})
+          .attr('y', 30)
+          .text(function(d) { return d.name; })
+          .style("fill", function(d){ return myColor(d.name) })
+          .style("font-size", 30)
+        .on("click", function(d){
+          currentOpacity = d3.selectAll("." + d.name).style("opacity")
+          // Change the opacity: from 0 to 1 or from 1 to 0
+          d3.selectAll("." + d.name).transition().style("opacity", currentOpacity == 1 ? 0:1)
+
+        })
+})
+
+// Start of ON_Stock_History
+d3.csv("https://raw.githubusercontent.com/FernandoEE/EECS6893_Daily_Financial_Aid/main/Financial_Data/on_stock_history.csv",
+  // When reading the csv, I must format variables:
+  function(d){
+    return { date : d3.timeParse("%Y-%m-%d")(d.Date.slice(0,10)), value : d.Close } //Use only chars [0:10] for the date
+  },
+  // Now I can use this dataset:
+  function(data) {
+
+  	document.write("<h3>ON Stock History</h3>");
+
+    //Create a div where the graph will take place
+    document.write("<div id=\"ON_Stock_History\"></div>");
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 30, bottom: 50, left: 60},
+      width = (800*2) - margin.left - margin.right,
+      height = (400*2) - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#ON_Stock_History")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + (margin.left + 45) + "," + margin.top + ")");
+    
+    // Add X axis --> it is a date format
+    var x = d3.scaleTime()
+      .domain(d3.extent(data, function(d) { return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+    	.attr("class", "axis")	//
+      .style("font", "20px times")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+    // Add Y axis
+    var y = d3.scaleLinear()
+      .domain( [0, d3.max(data, function(d) { return parseFloat(d.value)})])	// Give Max Value 
+      .range([ height, 0 ]);
+    svg.append("g")
+    	.attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisLeft(y));
+    // Add the line
+    svg.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "#2BDF20")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.line()
+        .x(function(d) { return x(d.date) })
+        .y(function(d) { return y(d.value) })
+        )
+    // Add the points
+    svg
+      .append("g")
+      .selectAll("dot")
+      .data(data)
+      .enter()
+      .append("circle")
+        .attr("cx", function(d) { return x(d.date) } )
+        .attr("cy", function(d) { return y(d.value) } )
+        .attr("r", 0.3)
+        .attr("fill", "#2BDF20")
+
+    // Add Bottom Label
+    svg.append("text")
+      .attr("x", 775)
+      .attr("y", 790)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .text("Date");
+
+    // Add Left Label
+    svg.append("text")
+      .attr("x", -425)
+      .attr("y", -50)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .attr("transform", "rotate(-90)")
+      .text("Price (USD)");
+
+})
+
+//Start of ON_Stock_MAE
+d3.csv("https://raw.githubusercontent.com/FernandoEE/EECS6893_Daily_Financial_Aid/main/Financial_Data/stock_mae_history.csv", function(d){
+    	return { date : d3.timeParse("%Y-%m-%d")(d.Date.slice(0,10)), Stock: d.Stock, Close: d.Close, Predicted_Close: d.Predicted_Close}
+  },
+  // Now I can use this dataset:
+  function(data) {
+
+  	document.write("<h3>ON Stock Prediction</h3>");
+
+    //Create a div where the graph will take place
+    document.write("<div id=\"ON_Stock_Prediction\"></div>");
+
+    // Parse the specific stock to display
+    parse_data = []
+    temp_dict = {}
+    for (let i = 0; i < data.length; i++) {
+      if (data[i]["Stock"] == "on") {
+        temp_dict["date"] = data[i]["date"]
+        temp_dict["Stock"] = data[i]["Stock"]
+        temp_dict["Close"] = data[i]["Close"]
+        temp_dict["Predicted_Close"] = data[i]["Predicted_Close"]
+
+        parse_data.push(temp_dict)
+
+        // Clear Temp
+        temp_dict = {}
+
+      }
+    }
+
+    // set the dimensions and margins of the graph
+	var margin = {top: 10, right: 100, bottom: 50, left: 30},
+	    width = (800*2) - margin.left - margin.right,
+	    height = (400*2) - margin.top - margin.bottom;
+
+	// append the svg object to the body of the page
+	var svg = d3.select("#on_Stock_Prediction")
+	  .append("svg")
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom)
+	  .append("g")
+	    .attr("transform",
+	          "translate(" + (margin.left + 45) + "," + margin.top + ")");
+
+    // List of groups (here I have one group per column)
+    var allGroup = ["Close", "Predicted_Close"]
+
+    // Reformat the data: we need an array of arrays of {x, y} tuples
+    var dataReady = allGroup.map( function(grpName) {
+      return {
+        name: grpName,
+        values: parse_data.map(function(d) {
+          return {time: d.date, value: +d[grpName]};
+        })
+      };
+    });
+
+    // A color scale: one color for each group
+    var myColor = d3.scaleOrdinal()
+      .domain(allGroup)
+      .range(d3.schemeSet2);
+
+    // Add X axis --> it is a date format
+    var x = d3.scaleTime() 
+      .domain(d3.extent(data, function(d) { return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisBottom(x));
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+    	.domain( [d3.min(parse_data, function(d) { return parseFloat(d.Predicted_Close)}), d3.max(parse_data, function(d) { return parseFloat(d.Close)})])  
+      .range([ height, 0 ]);
+    svg.append("g")
+      .attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisLeft(y));
+
+    // Add the lines
+    var line = d3.line()
+      .x(function(d) { return x(+d.time) })
+      .y(function(d) { return y(+d.value) })
+    svg.selectAll("myLines")
+      .data(dataReady)
+      .enter()
+      .append("path")
+        .attr("class", function(d){ return d.name })
+        .attr("d", function(d){ return line(d.values) } )
+        .attr("stroke", function(d){ return myColor(d.name) })
+        .style("stroke-width", 2)
+        .style("fill", "none")
+
+    // Add Bottom Label
+    svg.append("text")
+      .attr("x", 775)
+      .attr("y", 790)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .text("Date");
+
+    // Add Left Label
+    svg.append("text")
+      .attr("x", -425)
+      .attr("y", -50)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .attr("transform", "rotate(-90)")
+      .text("Price (USD)");
+
+    // Add the points
+    svg
+      .selectAll("myDots")
+      .data(dataReady)
+      .enter()
+        .append('g')
+        .style("fill", function(d){ return myColor(d.name) })
+        .attr("class", function(d){ return d.name })
+      .selectAll("myPoints")
+      .data(function(d){ return d.values })
+      .enter()
+      .append("circle")
+        .attr("cx", function(d) { return x(d.time) } )
+        .attr("cy", function(d) { return y(d.value) } )
+        .attr("r", 5)
+     
+    svg
+      .selectAll("myLegend")
+      .data(dataReady)
+      .enter()
+        .append('g')
+        .append("text")
+          .attr('x', function(d,i){ return 30 + i*80})
+          .attr('y', 30)
+          .text(function(d) { return d.name; })
+          .style("fill", function(d){ return myColor(d.name) })
+          .style("font-size", 30)
+        .on("click", function(d){
+          currentOpacity = d3.selectAll("." + d.name).style("opacity")
+          // Change the opacity: from 0 to 1 or from 1 to 0
+          d3.selectAll("." + d.name).transition().style("opacity", currentOpacity == 1 ? 0:1)
+
+        })
+})
+
+// Start of OXY_Stock_History
+d3.csv("https://raw.githubusercontent.com/FernandoEE/EECS6893_Daily_Financial_Aid/main/Financial_Data/oxy_stock_history.csv",
+  // When reading the csv, I must format variables:
+  function(d){
+    return { date : d3.timeParse("%Y-%m-%d")(d.Date.slice(0,10)), value : d.Close } //Use only chars [0:10] for the date
+  },
+  // Now I can use this dataset:
+  function(data) {
+
+  	document.write("<h3>OXY Stock History</h3>");
+
+    //Create a div where the graph will take place
+    document.write("<div id=\"OXY_Stock_History\"></div>");
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 30, bottom: 50, left: 60},
+      width = (800*2) - margin.left - margin.right,
+      height = (400*2) - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#OXY_Stock_History")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + (margin.left + 45) + "," + margin.top + ")");
+    
+    // Add X axis --> it is a date format
+    var x = d3.scaleTime()
+      .domain(d3.extent(data, function(d) { return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+    	.attr("class", "axis")	//
+      .style("font", "20px times")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+    // Add Y axis
+    var y = d3.scaleLinear()
+      .domain( [0, d3.max(data, function(d) { return parseFloat(d.value)})])	// Give Max Value 
+      .range([ height, 0 ]);
+    svg.append("g")
+    	.attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisLeft(y));
+    // Add the line
+    svg.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "#2BDF20")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.line()
+        .x(function(d) { return x(d.date) })
+        .y(function(d) { return y(d.value) })
+        )
+    // Add the points
+    svg
+      .append("g")
+      .selectAll("dot")
+      .data(data)
+      .enter()
+      .append("circle")
+        .attr("cx", function(d) { return x(d.date) } )
+        .attr("cy", function(d) { return y(d.value) } )
+        .attr("r", 0.3)
+        .attr("fill", "#2BDF20")
+
+    // Add Bottom Label
+    svg.append("text")
+      .attr("x", 775)
+      .attr("y", 790)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .text("Date");
+
+    // Add Left Label
+    svg.append("text")
+      .attr("x", -425)
+      .attr("y", -50)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .attr("transform", "rotate(-90)")
+      .text("Price (USD)");
+
+})
+
+//Start of OXY_Stock_MAE
+d3.csv("https://raw.githubusercontent.com/FernandoEE/EECS6893_Daily_Financial_Aid/main/Financial_Data/stock_mae_history.csv", function(d){
+    	return { date : d3.timeParse("%Y-%m-%d")(d.Date.slice(0,10)), Stock: d.Stock, Close: d.Close, Predicted_Close: d.Predicted_Close}
+  },
+  // Now I can use this dataset:
+  function(data) {
+
+  	document.write("<h3>OXY Stock Prediction</h3>");
+
+    //Create a div where the graph will take place
+    document.write("<div id=\"OXY_Stock_Prediction\"></div>");
+
+    // Parse the specific stock to display
+    parse_data = []
+    temp_dict = {}
+    for (let i = 0; i < data.length; i++) {
+      if (data[i]["Stock"] == "oxy") {
+        temp_dict["date"] = data[i]["date"]
+        temp_dict["Stock"] = data[i]["Stock"]
+        temp_dict["Close"] = data[i]["Close"]
+        temp_dict["Predicted_Close"] = data[i]["Predicted_Close"]
+
+        parse_data.push(temp_dict)
+
+        // Clear Temp
+        temp_dict = {}
+
+      }
+    }
+
+    // set the dimensions and margins of the graph
+	var margin = {top: 10, right: 100, bottom: 50, left: 30},
+	    width = (800*2) - margin.left - margin.right,
+	    height = (400*2) - margin.top - margin.bottom;
+
+	// append the svg object to the body of the page
+	var svg = d3.select("#OXY_Stock_Prediction")
+	  .append("svg")
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom)
+	  .append("g")
+	    .attr("transform",
+	          "translate(" + (margin.left + 45) + "," + margin.top + ")");
+
+    // List of groups (here I have one group per column)
+    var allGroup = ["Close", "Predicted_Close"]
+
+    // Reformat the data: we need an array of arrays of {x, y} tuples
+    var dataReady = allGroup.map( function(grpName) {
+      return {
+        name: grpName,
+        values: parse_data.map(function(d) {
+          return {time: d.date, value: +d[grpName]};
+        })
+      };
+    });
+
+    // A color scale: one color for each group
+    var myColor = d3.scaleOrdinal()
+      .domain(allGroup)
+      .range(d3.schemeSet2);
+
+    // Add X axis --> it is a date format
+    var x = d3.scaleTime() 
+      .domain(d3.extent(data, function(d) { return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisBottom(x));
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+    	.domain( [d3.min(parse_data, function(d) { return parseFloat(d.Predicted_Close)}), d3.max(parse_data, function(d) { return parseFloat(d.Close)})])  
+      .range([ height, 0 ]);
+    svg.append("g")
+      .attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisLeft(y));
+
+    // Add the lines
+    var line = d3.line()
+      .x(function(d) { return x(+d.time) })
+      .y(function(d) { return y(+d.value) })
+    svg.selectAll("myLines")
+      .data(dataReady)
+      .enter()
+      .append("path")
+        .attr("class", function(d){ return d.name })
+        .attr("d", function(d){ return line(d.values) } )
+        .attr("stroke", function(d){ return myColor(d.name) })
+        .style("stroke-width", 2)
+        .style("fill", "none")
+
+    // Add Bottom Label
+    svg.append("text")
+      .attr("x", 775)
+      .attr("y", 790)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .text("Date");
+
+    // Add Left Label
+    svg.append("text")
+      .attr("x", -425)
+      .attr("y", -50)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .attr("transform", "rotate(-90)")
+      .text("Price (USD)");
+
+    // Add the points
+    svg
+      .selectAll("myDots")
+      .data(dataReady)
+      .enter()
+        .append('g')
+        .style("fill", function(d){ return myColor(d.name) })
+        .attr("class", function(d){ return d.name })
+      .selectAll("myPoints")
+      .data(function(d){ return d.values })
+      .enter()
+      .append("circle")
+        .attr("cx", function(d) { return x(d.time) } )
+        .attr("cy", function(d) { return y(d.value) } )
+        .attr("r", 5)
+     
+    svg
+      .selectAll("myLegend")
+      .data(dataReady)
+      .enter()
+        .append('g')
+        .append("text")
+          .attr('x', function(d,i){ return 30 + i*80})
+          .attr('y', 30)
+          .text(function(d) { return d.name; })
+          .style("fill", function(d){ return myColor(d.name) })
+          .style("font-size", 30)
+        .on("click", function(d){
+          currentOpacity = d3.selectAll("." + d.name).style("opacity")
+          // Change the opacity: from 0 to 1 or from 1 to 0
+          d3.selectAll("." + d.name).transition().style("opacity", currentOpacity == 1 ? 0:1)
+
+        })
+})
+
+//Start of VFIAX_Stock_History
+d3.csv("https://raw.githubusercontent.com/FernandoEE/EECS6893_Daily_Financial_Aid/main/Financial_Data/vfiax_stock_history.csv",
+  // When reading the csv, I must format variables:
+  function(d){
+    return { date : d3.timeParse("%Y-%m-%d")(d.Date.slice(0,10)), value : d.Close } //Use only chars [0:10] for the date
+  },
+  // Now I can use this dataset:
+  function(data) {
+
+  	document.write("<h3>VFIAX Stock History</h3>");
+
+    //Create a div where the graph will take place
+    document.write("<div id=\"VFIAX_Stock_History\"></div>");
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 30, bottom: 50, left: 60},
+      width = (800*2) - margin.left - margin.right,
+      height = (400*2) - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#VFIAX_Stock_History")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + (margin.left + 45) + "," + margin.top + ")");
+    
+    // Add X axis --> it is a date format
+    var x = d3.scaleTime()
+      .domain(d3.extent(data, function(d) { return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+    	.attr("class", "axis")	//
+      .style("font", "20px times")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+    // Add Y axis
+    var y = d3.scaleLinear()
+      .domain( [0, d3.max(data, function(d) { return parseFloat(d.value)})])	// Give Max Value 
+      .range([ height, 0 ]);
+    svg.append("g")
+    	.attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisLeft(y));
+    // Add the line
+    svg.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "#2BDF20")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.line()
+        .x(function(d) { return x(d.date) })
+        .y(function(d) { return y(d.value) })
+        )
+    // Add the points
+    svg
+      .append("g")
+      .selectAll("dot")
+      .data(data)
+      .enter()
+      .append("circle")
+        .attr("cx", function(d) { return x(d.date) } )
+        .attr("cy", function(d) { return y(d.value) } )
+        .attr("r", 0.3)
+        .attr("fill", "#2BDF20")
+
+    // Add Bottom Label
+    svg.append("text")
+      .attr("x", 775)
+      .attr("y", 790)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .text("Date");
+
+    // Add Left Label
+    svg.append("text")
+      .attr("x", -425)
+      .attr("y", -50)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .attr("transform", "rotate(-90)")
+      .text("Price (USD)");
+
+})
+
+//Start of VFIAX_Stock_MAE
+d3.csv("https://raw.githubusercontent.com/FernandoEE/EECS6893_Daily_Financial_Aid/main/Financial_Data/stock_mae_history.csv", function(d){
+    	return { date : d3.timeParse("%Y-%m-%d")(d.Date.slice(0,10)), Stock: d.Stock, Close: d.Close, Predicted_Close: d.Predicted_Close}
+  },
+  // Now I can use this dataset:
+  function(data) {
+
+  	document.write("<h3>VFIAX Stock Prediction</h3>");
+
+    //Create a div where the graph will take place
+    document.write("<div id=\"VFIAX_Stock_Prediction\"></div>");
+
+    // Parse the specific stock to display
+    parse_data = []
+    temp_dict = {}
+    for (let i = 0; i < data.length; i++) {
+      if (data[i]["Stock"] == "vfiax") {
+        temp_dict["date"] = data[i]["date"]
+        temp_dict["Stock"] = data[i]["Stock"]
+        temp_dict["Close"] = data[i]["Close"]
+        temp_dict["Predicted_Close"] = data[i]["Predicted_Close"]
+
+        parse_data.push(temp_dict)
+
+        // Clear Temp
+        temp_dict = {}
+
+      }
+    }
+
+  // set the dimensions and margins of the graph
+	var margin = {top: 10, right: 100, bottom: 50, left: 30},
+	    width = (800*2) - margin.left - margin.right,
+	    height = (400*2) - margin.top - margin.bottom;
+
+	// append the svg object to the body of the page
+	var svg = d3.select("#VFIAX_Stock_Prediction")
+	  .append("svg")
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom)
+	  .append("g")
+	    .attr("transform",
+	          "translate(" + (margin.left + 45) + "," + margin.top + ")");
+
+    // List of groups (here I have one group per column)
+    var allGroup = ["Close", "Predicted_Close"]
+
+    // Reformat the data: we need an array of arrays of {x, y} tuples
+    var dataReady = allGroup.map( function(grpName) {
+      return {
+        name: grpName,
+        values: parse_data.map(function(d) {
+          return {time: d.date, value: +d[grpName]};
+        })
+      };
+    });
+
+    // A color scale: one color for each group
+    var myColor = d3.scaleOrdinal()
+      .domain(allGroup)
+      .range(d3.schemeSet2);
+
+    // Add X axis --> it is a date format
+    var x = d3.scaleTime() 
+      .domain(d3.extent(data, function(d) { return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisBottom(x));
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+    	.domain( [d3.min(parse_data, function(d) { return parseFloat(d.Predicted_Close)}), d3.max(parse_data, function(d) { return parseFloat(d.Close)})])  
+      .range([ height, 0 ]);
+    svg.append("g")
+      .attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisLeft(y));
+
+    // Add the lines
+    var line = d3.line()
+      .x(function(d) { return x(+d.time) })
+      .y(function(d) { return y(+d.value) })
+    svg.selectAll("myLines")
+      .data(dataReady)
+      .enter()
+      .append("path")
+        .attr("class", function(d){ return d.name })
+        .attr("d", function(d){ return line(d.values) } )
+        .attr("stroke", function(d){ return myColor(d.name) })
+        .style("stroke-width", 2)
+        .style("fill", "none")
+
+    // Add Bottom Label
+    svg.append("text")
+      .attr("x", 775)
+      .attr("y", 790)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .text("Date");
+
+    // Add Left Label
+    svg.append("text")
+      .attr("x", -425)
+      .attr("y", -50)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .attr("transform", "rotate(-90)")
+      .text("Price (USD)");
+
+    // Add the points
+    svg
+      .selectAll("myDots")
+      .data(dataReady)
+      .enter()
+        .append('g')
+        .style("fill", function(d){ return myColor(d.name) })
+        .attr("class", function(d){ return d.name })
+      .selectAll("myPoints")
+      .data(function(d){ return d.values })
+      .enter()
+      .append("circle")
+        .attr("cx", function(d) { return x(d.time) } )
+        .attr("cy", function(d) { return y(d.value) } )
+        .attr("r", 5)
+     
+    svg
+      .selectAll("myLegend")
+      .data(dataReady)
+      .enter()
+        .append('g')
+        .append("text")
+          .attr('x', function(d,i){ return 30 + i*80})
+          .attr('y', 30)
+          .text(function(d) { return d.name; })
+          .style("fill", function(d){ return myColor(d.name) })
+          .style("font-size", 30)
+        .on("click", function(d){
+          currentOpacity = d3.selectAll("." + d.name).style("opacity")
+          // Change the opacity: from 0 to 1 or from 1 to 0
+          d3.selectAll("." + d.name).transition().style("opacity", currentOpacity == 1 ? 0:1)
+
+        })
+})
+
+// Start of VRTX_Stock_History
+d3.csv("https://raw.githubusercontent.com/FernandoEE/EECS6893_Daily_Financial_Aid/main/Financial_Data/vrtx_stock_history.csv",
+  // When reading the csv, I must format variables:
+  function(d){
+    return { date : d3.timeParse("%Y-%m-%d")(d.Date.slice(0,10)), value : d.Close } //Use only chars [0:10] for the date
+  },
+  // Now I can use this dataset:
+  function(data) {
+
+  	document.write("<h3>VRTX Stock History</h3>");
+
+    //Create a div where the graph will take place
+    document.write("<div id=\"VRTX_Stock_History\"></div>");
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 30, bottom: 50, left: 60},
+      width = (800*2) - margin.left - margin.right,
+      height = (400*2) - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#VRTX_Stock_History")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + (margin.left + 45) + "," + margin.top + ")");
+    
+    // Add X axis --> it is a date format
+    var x = d3.scaleTime()
+      .domain(d3.extent(data, function(d) { return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+    	.attr("class", "axis")	//
+      .style("font", "20px times")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+    // Add Y axis
+    var y = d3.scaleLinear()
+      .domain( [0, d3.max(data, function(d) { return parseFloat(d.value)})])	// Give Max Value 
+      .range([ height, 0 ]);
+    svg.append("g")
+    	.attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisLeft(y));
+    // Add the line
+    svg.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "#2BDF20")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.line()
+        .x(function(d) { return x(d.date) })
+        .y(function(d) { return y(d.value) })
+        )
+    // Add the points
+    svg
+      .append("g")
+      .selectAll("dot")
+      .data(data)
+      .enter()
+      .append("circle")
+        .attr("cx", function(d) { return x(d.date) } )
+        .attr("cy", function(d) { return y(d.value) } )
+        .attr("r", 0.3)
+        .attr("fill", "#2BDF20")
+
+    // Add Bottom Label
+    svg.append("text")
+      .attr("x", 775)
+      .attr("y", 790)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .text("Date");
+
+    // Add Left Label
+    svg.append("text")
+      .attr("x", -425)
+      .attr("y", -50)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .attr("transform", "rotate(-90)")
+      .text("Price (USD)");
+
+})
+
+// Start of VRTX_Stock_MAE
+d3.csv("https://raw.githubusercontent.com/FernandoEE/EECS6893_Daily_Financial_Aid/main/Financial_Data/stock_mae_history.csv", function(d){
+    	return { date : d3.timeParse("%Y-%m-%d")(d.Date.slice(0,10)), Stock: d.Stock, Close: d.Close, Predicted_Close: d.Predicted_Close}
+  },
+  // Now I can use this dataset:
+  function(data) {
+
+  	document.write("<h3>VRTX Stock Prediction</h3>");
+
+    //Create a div where the graph will take place
+    document.write("<div id=\"VRTX_Stock_Prediction\"></div>");
+
+    // Parse the specific stock to display
+    parse_data = []
+    temp_dict = {}
+    for (let i = 0; i < data.length; i++) {
+      if (data[i]["Stock"] == "vrtx") {
+        temp_dict["date"] = data[i]["date"]
+        temp_dict["Stock"] = data[i]["Stock"]
+        temp_dict["Close"] = data[i]["Close"]
+        temp_dict["Predicted_Close"] = data[i]["Predicted_Close"]
+
+        parse_data.push(temp_dict)
+
+        // Clear Temp
+        temp_dict = {}
+
+      }
+    }
+
+  // set the dimensions and margins of the graph
+	var margin = {top: 10, right: 100, bottom: 50, left: 30},
+	    width = (800*2) - margin.left - margin.right,
+	    height = (400*2) - margin.top - margin.bottom;
+
+	// append the svg object to the body of the page
+	var svg = d3.select("#VRTX_Stock_Prediction")
+	  .append("svg")
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom)
+	  .append("g")
+	    .attr("transform",
+	          "translate(" + (margin.left + 45) + "," + margin.top + ")");
+
+    // List of groups (here I have one group per column)
+    var allGroup = ["Close", "Predicted_Close"]
+
+    // Reformat the data: we need an array of arrays of {x, y} tuples
+    var dataReady = allGroup.map( function(grpName) {
+      return {
+        name: grpName,
+        values: parse_data.map(function(d) {
+          return {time: d.date, value: +d[grpName]};
+        })
+      };
+    });
+
+    // A color scale: one color for each group
+    var myColor = d3.scaleOrdinal()
+      .domain(allGroup)
+      .range(d3.schemeSet2);
+
+    // Add X axis --> it is a date format
+    var x = d3.scaleTime() 
+      .domain(d3.extent(data, function(d) { return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisBottom(x));
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+    	.domain( [d3.min(parse_data, function(d) { return parseFloat(d.Predicted_Close)}), d3.max(parse_data, function(d) { return parseFloat(d.Close)})])  
+      .range([ height, 0 ]);
+    svg.append("g")
+      .attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisLeft(y));
+
+    // Add the lines
+    var line = d3.line()
+      .x(function(d) { return x(+d.time) })
+      .y(function(d) { return y(+d.value) })
+    svg.selectAll("myLines")
+      .data(dataReady)
+      .enter()
+      .append("path")
+        .attr("class", function(d){ return d.name })
+        .attr("d", function(d){ return line(d.values) } )
+        .attr("stroke", function(d){ return myColor(d.name) })
+        .style("stroke-width", 2)
+        .style("fill", "none")
+
+    // Add Bottom Label
+    svg.append("text")
+      .attr("x", 775)
+      .attr("y", 790)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .text("Date");
+
+    // Add Left Label
+    svg.append("text")
+      .attr("x", -425)
+      .attr("y", -50)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .attr("transform", "rotate(-90)")
+      .text("Price (USD)");
+
+    // Add the points
+    svg
+      .selectAll("myDots")
+      .data(dataReady)
+      .enter()
+        .append('g')
+        .style("fill", function(d){ return myColor(d.name) })
+        .attr("class", function(d){ return d.name })
+      .selectAll("myPoints")
+      .data(function(d){ return d.values })
+      .enter()
+      .append("circle")
+        .attr("cx", function(d) { return x(d.time) } )
+        .attr("cy", function(d) { return y(d.value) } )
+        .attr("r", 5)
+     
+    svg
+      .selectAll("myLegend")
+      .data(dataReady)
+      .enter()
+        .append('g')
+        .append("text")
+          .attr('x', function(d,i){ return 30 + i*80})
+          .attr('y', 30)
+          .text(function(d) { return d.name; })
+          .style("fill", function(d){ return myColor(d.name) })
+          .style("font-size", 30)
+        .on("click", function(d){
+          currentOpacity = d3.selectAll("." + d.name).style("opacity")
+          // Change the opacity: from 0 to 1 or from 1 to 0
+          d3.selectAll("." + d.name).transition().style("opacity", currentOpacity == 1 ? 0:1)
+
+        })
+})
+
+//Start of VSMPX_Stock_History
+d3.csv("https://raw.githubusercontent.com/FernandoEE/EECS6893_Daily_Financial_Aid/main/Financial_Data/vsmpx_stock_history.csv",
+  // When reading the csv, I must format variables:
+  function(d){
+    return { date : d3.timeParse("%Y-%m-%d")(d.Date.slice(0,10)), value : d.Close } //Use only chars [0:10] for the date
+  },
+  // Now I can use this dataset:
+  function(data) {
+
+  	document.write("<h3>VSMPX Stock History</h3>");
+
+    //Create a div where the graph will take place
+    document.write("<div id=\"VSMPX_Stock_History\"></div>");
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 30, bottom: 50, left: 60},
+      width = (800*2) - margin.left - margin.right,
+      height = (400*2) - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#VSMPX_Stock_History")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + (margin.left + 45) + "," + margin.top + ")");
+    
+    // Add X axis --> it is a date format
+    var x = d3.scaleTime()
+      .domain(d3.extent(data, function(d) { return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+    	.attr("class", "axis")	//
+      .style("font", "20px times")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+    // Add Y axis
+    var y = d3.scaleLinear()
+      .domain( [0, d3.max(data, function(d) { return parseFloat(d.value)})])	// Give Max Value 
+      .range([ height, 0 ]);
+    svg.append("g")
+    	.attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisLeft(y));
+    // Add the line
+    svg.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "#2BDF20")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.line()
+        .x(function(d) { return x(d.date) })
+        .y(function(d) { return y(d.value) })
+        )
+    // Add the points
+    svg
+      .append("g")
+      .selectAll("dot")
+      .data(data)
+      .enter()
+      .append("circle")
+        .attr("cx", function(d) { return x(d.date) } )
+        .attr("cy", function(d) { return y(d.value) } )
+        .attr("r", 0.3)
+        .attr("fill", "#2BDF20")
+
+    // Add Bottom Label
+    svg.append("text")
+      .attr("x", 775)
+      .attr("y", 790)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .text("Date");
+
+    // Add Left Label
+    svg.append("text")
+      .attr("x", -425)
+      .attr("y", -50)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .attr("transform", "rotate(-90)")
+      .text("Price (USD)");
+
+})
+
+//Start of VSMPX_Stock_MAE
+d3.csv("https://raw.githubusercontent.com/FernandoEE/EECS6893_Daily_Financial_Aid/main/Financial_Data/stock_mae_history.csv", function(d){
+    	return { date : d3.timeParse("%Y-%m-%d")(d.Date.slice(0,10)), Stock: d.Stock, Close: d.Close, Predicted_Close: d.Predicted_Close}
+  },
+  // Now I can use this dataset:
+  function(data) {
+
+  	document.write("<h3>VSMPX Stock Prediction</h3>");
+
+    //Create a div where the graph will take place
+    document.write("<div id=\"VSMPX_Stock_Prediction\"></div>");
+
+    // Parse the specific stock to display
+    parse_data = []
+    temp_dict = {}
+    for (let i = 0; i < data.length; i++) {
+      if (data[i]["Stock"] == "vsmpx") {
+        temp_dict["date"] = data[i]["date"]
+        temp_dict["Stock"] = data[i]["Stock"]
+        temp_dict["Close"] = data[i]["Close"]
+        temp_dict["Predicted_Close"] = data[i]["Predicted_Close"]
+
+        parse_data.push(temp_dict)
+
+        // Clear Temp
+        temp_dict = {}
+
+      }
+    }
+
+  // set the dimensions and margins of the graph
+	var margin = {top: 10, right: 100, bottom: 50, left: 30},
+	    width = (800*2) - margin.left - margin.right,
+	    height = (400*2) - margin.top - margin.bottom;
+
+	// append the svg object to the body of the page
+	var svg = d3.select("#VSMPX_Stock_Prediction")
+	  .append("svg")
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom)
+	  .append("g")
+	    .attr("transform",
+	          "translate(" + (margin.left + 45) + "," + margin.top + ")");
+
+    // List of groups (here I have one group per column)
+    var allGroup = ["Close", "Predicted_Close"]
+
+    // Reformat the data: we need an array of arrays of {x, y} tuples
+    var dataReady = allGroup.map( function(grpName) {
+      return {
+        name: grpName,
+        values: parse_data.map(function(d) {
+          return {time: d.date, value: +d[grpName]};
+        })
+      };
+    });
+
+    // A color scale: one color for each group
+    var myColor = d3.scaleOrdinal()
+      .domain(allGroup)
+      .range(d3.schemeSet2);
+
+    // Add X axis --> it is a date format
+    var x = d3.scaleTime() 
+      .domain(d3.extent(data, function(d) { return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisBottom(x));
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+    	.domain( [d3.min(parse_data, function(d) { return parseFloat(d.Predicted_Close)}), d3.max(parse_data, function(d) { return parseFloat(d.Close)})])  
+      .range([ height, 0 ]);
+    svg.append("g")
+      .attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisLeft(y));
+
+    // Add the lines
+    var line = d3.line()
+      .x(function(d) { return x(+d.time) })
+      .y(function(d) { return y(+d.value) })
+    svg.selectAll("myLines")
+      .data(dataReady)
+      .enter()
+      .append("path")
+        .attr("class", function(d){ return d.name })
+        .attr("d", function(d){ return line(d.values) } )
+        .attr("stroke", function(d){ return myColor(d.name) })
+        .style("stroke-width", 2)
+        .style("fill", "none")
+
+    // Add Bottom Label
+    svg.append("text")
+      .attr("x", 775)
+      .attr("y", 790)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .text("Date");
+
+    // Add Left Label
+    svg.append("text")
+      .attr("x", -425)
+      .attr("y", -50)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .attr("transform", "rotate(-90)")
+      .text("Price (USD)");
+
+    // Add the points
+    svg
+      .selectAll("myDots")
+      .data(dataReady)
+      .enter()
+        .append('g')
+        .style("fill", function(d){ return myColor(d.name) })
+        .attr("class", function(d){ return d.name })
+      .selectAll("myPoints")
+      .data(function(d){ return d.values })
+      .enter()
+      .append("circle")
+        .attr("cx", function(d) { return x(d.time) } )
+        .attr("cy", function(d) { return y(d.value) } )
+        .attr("r", 5)
+     
+    svg
+      .selectAll("myLegend")
+      .data(dataReady)
+      .enter()
+        .append('g')
+        .append("text")
+          .attr('x', function(d,i){ return 30 + i*80})
+          .attr('y', 30)
+          .text(function(d) { return d.name; })
+          .style("fill", function(d){ return myColor(d.name) })
+          .style("font-size", 30)
+        .on("click", function(d){
+          currentOpacity = d3.selectAll("." + d.name).style("opacity")
+          // Change the opacity: from 0 to 1 or from 1 to 0
+          d3.selectAll("." + d.name).transition().style("opacity", currentOpacity == 1 ? 0:1)
+
+        })
+})
+
+//Start of XOM_Stock_History
+d3.csv("https://raw.githubusercontent.com/FernandoEE/EECS6893_Daily_Financial_Aid/main/Financial_Data/xom_stock_history.csv",
+  // When reading the csv, I must format variables:
+  function(d){
+    return { date : d3.timeParse("%Y-%m-%d")(d.Date.slice(0,10)), value : d.Close } //Use only chars [0:10] for the date
+  },
+  // Now I can use this dataset:
+  function(data) {
+
+  	document.write("<h3>XOM Stock History</h3>");
+
+    //Create a div where the graph will take place
+    document.write("<div id=\"XOM_Stock_History\"></div>");
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 30, bottom: 50, left: 60},
+      width = (800*2) - margin.left - margin.right,
+      height = (400*2) - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#XOM_Stock_History")
+      .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform",
+              "translate(" + (margin.left + 45) + "," + margin.top + ")");
+    
+    // Add X axis --> it is a date format
+    var x = d3.scaleTime()
+      .domain(d3.extent(data, function(d) { return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+    	.attr("class", "axis")	//
+      .style("font", "20px times")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+    // Add Y axis
+    var y = d3.scaleLinear()
+      .domain( [0, d3.max(data, function(d) { return parseFloat(d.value)})])	// Give Max Value 
+      .range([ height, 0 ]);
+    svg.append("g")
+    	.attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisLeft(y));
+    // Add the line
+    svg.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "#2BDF20")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.line()
+        .x(function(d) { return x(d.date) })
+        .y(function(d) { return y(d.value) })
+        )
+    // Add the points
+    svg
+      .append("g")
+      .selectAll("dot")
+      .data(data)
+      .enter()
+      .append("circle")
+        .attr("cx", function(d) { return x(d.date) } )
+        .attr("cy", function(d) { return y(d.value) } )
+        .attr("r", 0.3)
+        .attr("fill", "#2BDF20")
+
+    // Add Bottom Label
+    svg.append("text")
+      .attr("x", 775)
+      .attr("y", 790)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .text("Date");
+
+    // Add Left Label
+    svg.append("text")
+      .attr("x", -425)
+      .attr("y", -50)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .attr("transform", "rotate(-90)")
+      .text("Price (USD)");
+})
+
+//Start of XOM_Stock_MAE
+d3.csv("https://raw.githubusercontent.com/FernandoEE/EECS6893_Daily_Financial_Aid/main/Financial_Data/stock_mae_history.csv", function(d){
+    	return { date : d3.timeParse("%Y-%m-%d")(d.Date.slice(0,10)), Stock: d.Stock, Close: d.Close, Predicted_Close: d.Predicted_Close}
+  },
+  // Now I can use this dataset:
+  function(data) {
+
+  	document.write("<h3>XOM Stock Prediction</h3>");
+
+    //Create a div where the graph will take place
+    document.write("<div id=\"XOM_Stock_Prediction\"></div>");
+
+    // Parse the specific stock to display
+    parse_data = []
+    temp_dict = {}
+    for (let i = 0; i < data.length; i++) {
+      if (data[i]["Stock"] == "xom") {
+        temp_dict["date"] = data[i]["date"]
+        temp_dict["Stock"] = data[i]["Stock"]
+        temp_dict["Close"] = data[i]["Close"]
+        temp_dict["Predicted_Close"] = data[i]["Predicted_Close"]
+
+        parse_data.push(temp_dict)
+
+        // Clear Temp
+        temp_dict = {}
+
+      }
+    }
+
+    // set the dimensions and margins of the graph
+	var margin = {top: 10, right: 100, bottom: 50, left: 30},
+	    width = (800*2) - margin.left - margin.right,
+	    height = (400*2) - margin.top - margin.bottom;
+
+	// append the svg object to the body of the page
+	var svg = d3.select("#XOM_Stock_Prediction")
+	  .append("svg")
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom)
+	  .append("g")
+	    .attr("transform",
+	          "translate(" + (margin.left + 45) + "," + margin.top + ")");
+
+    // List of groups (here I have one group per column)
+    var allGroup = ["Close", "Predicted_Close"]
+
+    // Reformat the data: we need an array of arrays of {x, y} tuples
+    var dataReady = allGroup.map( function(grpName) {
+      return {
+        name: grpName,
+        values: parse_data.map(function(d) {
+          return {time: d.date, value: +d[grpName]};
+        })
+      };
+    });
+
+    // A color scale: one color for each group
+    var myColor = d3.scaleOrdinal()
+      .domain(allGroup)
+      .range(d3.schemeSet2);
+
+    // Add X axis --> it is a date format
+    var x = d3.scaleTime() 
+      .domain(d3.extent(data, function(d) { return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisBottom(x));
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+    	.domain( [d3.min(parse_data, function(d) { return parseFloat(d.Predicted_Close)}), d3.max(parse_data, function(d) { return parseFloat(d.Close)})])  
+      .range([ height, 0 ]);
+    svg.append("g")
+      .attr("class", "axis")	//
+      .style("font", "20px times")
+      .call(d3.axisLeft(y));
+
+    // Add the lines
+    var line = d3.line()
+      .x(function(d) { return x(+d.time) })
+      .y(function(d) { return y(+d.value) })
+    svg.selectAll("myLines")
+      .data(dataReady)
+      .enter()
+      .append("path")
+        .attr("class", function(d){ return d.name })
+        .attr("d", function(d){ return line(d.values) } )
+        .attr("stroke", function(d){ return myColor(d.name) })
+        .style("stroke-width", 2)
+        .style("fill", "none")
+
+    // Add Bottom Label
+    svg.append("text")
+      .attr("x", 775)
+      .attr("y", 790)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .text("Date");
+
+    // Add Left Label
+    svg.append("text")
+      .attr("x", -425)
+      .attr("y", -50)
+      .style("font", "30px times")
+      .style("fill", "white")
+      .attr("transform", "rotate(-90)")
+      .text("Price (USD)");
+
+    // Add the points
+    svg
+      .selectAll("myDots")
+      .data(dataReady)
+      .enter()
+        .append('g')
+        .style("fill", function(d){ return myColor(d.name) })
+        .attr("class", function(d){ return d.name })
+      .selectAll("myPoints")
+      .data(function(d){ return d.values })
+      .enter()
+      .append("circle")
+        .attr("cx", function(d) { return x(d.time) } )
+        .attr("cy", function(d) { return y(d.value) } )
+        .attr("r", 5)
+     
+    svg
+      .selectAll("myLegend")
+      .data(dataReady)
+      .enter()
+        .append('g')
+        .append("text")
+          .attr('x', function(d,i){ return 30 + i*80})
+          .attr('y', 30)
+          .text(function(d) { return d.name; })
+          .style("fill", function(d){ return myColor(d.name) })
+          .style("font-size", 30)
+        .on("click", function(d){
+          currentOpacity = d3.selectAll("." + d.name).style("opacity")
+          // Change the opacity: from 0 to 1 or from 1 to 0
+          d3.selectAll("." + d.name).transition().style("opacity", currentOpacity == 1 ? 0:1)
+
+        })
+
+  document.write("</body>");
+  document.write("</html>");
+})
+
+</script>
